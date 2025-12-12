@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Clean React Auth Files</title>
+
+<style>
+body {
+  background: #0d0d0d;
+  color: #00ff95;
+  font-family: Consolas, monospace;
+  padding: 20px;
+  white-space: pre-wrap;
+}
+.section {
+  border: 1px solid #444;
+  padding: 20px;
+  margin-bottom: 40px;
+  background: #111;
+}
+.section-title {
+  font-size: 20px;
+  font-weight: bold;
+  color: #39ff14;
+  margin-bottom: 10px;
+}
+code {
+  display: block;
+  padding: 10px;
+  background: #000;
+  border: 1px solid #333;
+  color: #00eaff;
+}
+</style>
+
+</head>
+<body>
+
+
+<!-- =============================================== -->
+<div class="section">
+<div class="section-title">tailwind.config.js</div>
+<code>
+/** @type {import('tailwindcss').Config} */
+export default {
+  content: ["./index.html", "./src/**/*.{js,jsx}"],
+  darkMode: "class",
+  theme: { extend: {} },
+  plugins: [],
+};
+</code>
+</div>
+
+
+<!-- =============================================== -->
+<div class="section">
+<div class="section-title">index.css</div>
+<code>
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  @apply transition-colors duration-300;
+}
+
+.light-bg {
+  background: #f1f5f9;
+}
+
+.dark-bg {
+  background: #0b1120;
+}
+</code>
+</div>
+
+
+<!-- =============================================== -->
+<div class="section">
+<div class="section-title">src/main.jsx</div>
+<code>
+import React from "react";
+import ReactDOM from "react-dom/client";
+import App from "./App";
+import "./index.css";
+
+ReactDOM.createRoot(document.getElementById("root")).render(
+  &lt;React.StrictMode&gt;
+    &lt;App /&gt;
+  &lt;/React.StrictMode&gt;
+);
+</code>
+</div>
+
+
+<!-- =============================================== -->
+<div class="section">
+<div class="section-title">src/App.jsx</div>
+<code>
+import { useState } from "react";
+import { ThemeProvider } from "./context/ThemeContext";
+import Login from "./pages/Login";
+import Signup from "./pages/Signup";
+
+export default function App() {
+  const [page, setPage] = useState("signup");
+
+  return (
+    &lt;ThemeProvider&gt;
+      {page === "login"
+        ? &lt;Login onNavigate={setPage} /&gt;
+        : &lt;Signup onNavigate={setPage} /&gt;}
+    &lt;/ThemeProvider&gt;
+  );
+}
+</code>
+</div>
+
+
+<!-- =============================================== -->
+<div class="section">
+<div class="section-title">src/context/ThemeContext.jsx</div>
+<code>
+import { createContext, useContext, useEffect, useState } from "react";
+
+const ThemeContext = createContext();
+
+export const ThemeProvider = ({ children }) =&gt; {
+  const [theme, setTheme] = useState("dark");
+
+  useEffect(() =&gt; {
+    document.documentElement.classList.remove("light","dark");
+    document.documentElement.classList.add(theme);
+  }, [theme]);
+
+  const toggleTheme = () =&gt; {
+    setTheme(theme === "dark" ? "light" : "dark");
+  };
+
+  return (
+    &lt;ThemeContext.Provider value={{ theme, toggleTheme }}&gt;
+      {children}
+    &lt;/ThemeContext.Provider&gt;
+  );
+};
+
+export const useTheme = () =&gt; useContext(ThemeContext);
+</code>
+</div>
+
+
+<!-- =============================================== -->
+<div class="section">
+<div class="section-title">src/components/ThemeToggle.jsx</div>
+<code>
+import { Sun, Moon } from "lucide-react";
+import { useTheme } from "../context/ThemeContext";
+
+export default function ThemeToggle() {
+  const { theme, toggleTheme } = useTheme();
+
+  return (
+    &lt;button
+      onClick={toggleTheme}
+      className="absolute top-6 right-6 p-2 rounded-lg hover:bg-gray-700/50"
+    &gt;
+      {theme === "dark" ? &lt;Sun className="text-gray-300" /&gt; : &lt;Moon /&gt;}
+    &lt;/button&gt;
+  );
+}
+</code>
+</div>
+
+
+<!-- =============================================== -->
+<div class="section">
+<div class="section-title">src/components/BackButton.jsx</div>
+<code>
+import { ArrowLeft } from "lucide-react";
+
+export default function BackButton() {
+  return (
+    &lt;button className="absolute top-6 left-6 flex items-center gap-2 text-blue-400"&gt;
+      &lt;ArrowLeft size={16} /&gt;
+      Back
+    &lt;/button&gt;
+  );
+}
+</code>
+</div>
+
+
+<!-- =============================================== -->
+<div class="section">
+<div class="section-title">src/components/InputField.jsx</div>
+<code>
+import { Mail, Lock, User, Eye, EyeOff, XCircle } from "lucide-react";
+import { useTheme } from "../context/ThemeContext";
+import { useState } from "react";
+
+export default function InputField({ 
+  label, icon, type="text", value, onChange, error, placeholder 
+}) {
+  const { theme } = useTheme();
+  const [show, setShow] = useState(false);
+
+  const icons = { user: User, mail: Mail, lock: Lock };
+  const Icon = icons[icon];
+
+  const inputType = type === "password" &amp;&amp; show ? "text" : type;
+
+  return (
+    &lt;div className="mb-5"&gt;
+      &lt;label className="text-sm"&gt;{label}&lt;/label&gt;
+
+      &lt;div className="relative mt-1"&gt;
+        &lt;Icon className="absolute left-3 top-3 text-gray-500" size={18} /&gt;
+
+        &lt;input
+          type={inputType}
+          value={value}
+          placeholder={placeholder}
+          onChange={(e)=&gt;onChange(e.target.value)}
+          className="w-full bg-gray-900 text-white py-3 pl-10 pr-10 rounded-lg"
+        /&gt;
+
+        {type === "password" &amp;&amp; value &amp;&amp; (
+          &lt;button 
+            type="button"
+            onClick={()=&gt;setShow(!show)}
+            className="absolute right-3 top-3 text-gray-400"&gt;
+            {show ? &lt;EyeOff size={18} /&gt; : &lt;Eye size={18} /&gt;}
+          &lt;/button&gt;
+        )}
+      &lt;/div&gt;
+
+      {error &amp;&amp; (
+        &lt;p className="text-red-400 text-xs flex items-center gap-1 mt-1"&gt;
+          &lt;XCircle size={12} /&gt; {error}
+        &lt;/p&gt;
+      )}
+    &lt;/div&gt;
+  );
+}
+</code>
+</div>
+
+
+<!-- =============================================== -->
+<div class="section">
+<div class="section-title">src/pages/Login.jsx</div>
+<code>
+import { useState } from "react";
+import InputField from "../components/InputField";
+import ThemeToggle from "../components/ThemeToggle";
+import BackButton from "../components/BackButton";
+import { useTheme } from "../context/ThemeContext";
+
+export default function Login({ onNavigate }) {
+  const { theme } = useTheme();
+
+  const [email,setEmail] = useState("");
+  const [password,setPassword] = useState("");
+  const [errors,setErrors] = useState({});
+
+  const validate = () =&gt; {
+    const e = {};
+    if (!email) e.email="Email required";
+    if (!password) e.password="Password required";
+    setErrors(e);
+    return Object.keys(e).length===0;
+  };
+
+  const handleLogin = () =&gt; {
+    if (!validate()) return;
+    alert("Login success"); // simple
+  };
+
+  return (
+    &lt;div className="min-h-screen flex items-center justify-center dark-bg relative"&gt;
+
+      &lt;BackButton /&gt;
+      &lt;ThemeToggle /&gt;
+
+      &lt;div className="p-10 rounded-xl bg-gray-800/50 backdrop-blur-lg w-full max-w-md"&gt;
+
+        &lt;h1 className="text-3xl text-white mb-6"&gt;
+          Welcome Back
+        &lt;/h1&gt;
+
+        &lt;InputField 
+          label="Email" icon="mail"
+          value={email} onChange={setEmail}
+          error={errors.email}
+          placeholder="name@example.com"
+        /&gt;
+
+        &lt;InputField 
+          label="Password" icon="lock" type="password"
+          value={password} onChange={setPassword}
+          error={errors.password}
+          placeholder="Your password"
+        /&gt;
+
+        &lt;button 
+          onClick={handleLogin}
+          className="w-full bg-blue-600 text-white py-3 rounded-lg"&gt;
+          Login
+        &lt;/button&gt;
+
+        &lt;p className="text-center text-sm text-gray-400 mt-4"&gt;
+          Don't have an account?
+          &lt;button 
+            className="text-blue-400"
+            onClick={()=&gt;onNavigate("signup")}&gt;
+            Sign Up
+          &lt;/button&gt;
+        &lt;/p&gt;
+
+      &lt;/div&gt;
+
+    &lt;/div&gt;
+  );
+}
+</code>
+</div>
+
+
+<!-- =============================================== -->
+<div class="section">
+<div class="section-title">src/pages/Signup.jsx</div>
+<code>
+import { useState } from "react";
+import InputField from "../components/InputField";
+import ThemeToggle from "../components/ThemeToggle";
+import BackButton from "../components/BackButton";
+import { useTheme } from "../context/ThemeContext";
+
+export default function Signup({ onNavigate }) {
+
+  const [name,setName] = useState("");
+  const [email,setEmail] = useState("");
+  const [password,setPassword] = useState("");
+  const [confirm,setConfirm] = useState("");
+  const [errors,setErrors] = useState({});
+
+  const validate = () =&gt; {
+    const e={};
+    if (!name) e.name="Name required";
+    if (!email) e.email="Email required";
+    if (!password) e.password="Password required";
+    if (password!==confirm) e.confirm="Passwords do not match";
+    setErrors(e);
+    return Object.keys(e).length===0;
+  };
+
+  const handleSignup = () =&gt; {
+    if (!validate()) return;
+    alert("Signup successful");
+  };
+
+  return (
+    &lt;div className="min-h-screen flex items-center justify-center dark-bg relative"&gt;
+
+      &lt;BackButton /&gt;
+      &lt;ThemeToggle /&gt;
+
+      &lt;div className="p-10 rounded-xl bg-gray-800/50 backdrop-blur-lg w-full max-w-md"&gt;
+        
+        &lt;h1 className="text-3xl text-white mb-6"&gt;
+          Create Account
+        &lt;/h1&gt;
+
+        &lt;InputField 
+          label="Full Name" icon="user"
+          value={name} onChange={setName}
+          error={errors.name}
+          placeholder="John Doe"
+        /&gt;
+
+        &lt;InputField 
+          label="Email" icon="mail"
+          value={email} onChange={setEmail}
+          error={errors.email}
+          placeholder="name@example.com"
+        /&gt;
+
+        &lt;InputField 
+          label="Password" icon="lock" type="password"
+          value={password} onChange={setPassword}
+          error={errors.password}
+          placeholder="Create password"
+        /&gt;
+
+        &lt;InputField 
+          label="Confirm Password" icon="lock" type="password"
+          value={confirm} onChange={setConfirm}
+          error={errors.confirm}
+          placeholder="Confirm your password"
+        /&gt;
+
+        &lt;button 
+          onClick={handleSignup}
+          className="w-full bg-blue-600 text-white py-3 rounded-lg"&gt;
+          Create Account
+        &lt;/button&gt;
+
+        &lt;p className="text-center text-sm text-gray-400 mt-4"&gt;
+          Already have an account?
+          &lt;button 
+            className="text-blue-400"
+            onClick={()=&gt;onNavigate("login")}&gt;
+            Login
+          &lt;/button&gt;
+        &lt;/p&gt;
+
+      &lt;/div&gt;
+
+    &lt;/div&gt;
+  );
+}
+</code>
+</div>
+
+</body>
+</html>
