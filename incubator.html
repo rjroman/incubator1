@@ -1,426 +1,567 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Clean React Auth Files</title>
-
-<style>
-body {
-  background: #0d0d0d;
-  color: #00ff95;
-  font-family: Consolas, monospace;
-  padding: 20px;
-  white-space: pre-wrap;
-}
-.section {
-  border: 1px solid #444;
-  padding: 20px;
-  margin-bottom: 40px;
-  background: #111;
-}
-.section-title {
-  font-size: 20px;
-  font-weight: bold;
-  color: #39ff14;
-  margin-bottom: 10px;
-}
-code {
-  display: block;
-  padding: 10px;
-  background: #000;
-  border: 1px solid #333;
-  color: #00eaff;
-}
-</style>
-
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CodeLens Visualizer - Java</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/clike/clike.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/theme/monokai.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .CodeMirror {
+            height: 600px;
+            font-size: 14px;
+            border-radius: 8px;
+        }
+        .cm-current-line-highlight {
+            background-color: rgba(250, 204, 21, 0.15);
+            border-left: 3px solid #facc15;
+        }
+        .cm-previous-line-highlight {
+            background-color: rgba(59, 130, 246, 0.15);
+            border-left: 3px solid #3b82f6;
+        }
+    </style>
 </head>
 <body>
-
-
-<!-- =============================================== -->
-<div class="section">
-<div class="section-title">tailwind.config.js</div>
-<code>
-/** @type {import('tailwindcss').Config} */
-export default {
-  content: ["./index.html", "./src/**/*.{js,jsx}"],
-  darkMode: "class",
-  theme: { extend: {} },
-  plugins: [],
-};
-</code>
-</div>
-
-
-<!-- =============================================== -->
-<div class="section">
-<div class="section-title">index.css</div>
-<code>
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
-body {
-  @apply transition-colors duration-300;
-}
-
-.light-bg {
-  background: #f1f5f9;
-}
-
-.dark-bg {
-  background: #0b1120;
-}
-</code>
-</div>
-
-
-<!-- =============================================== -->
-<div class="section">
-<div class="section-title">src/main.jsx</div>
-<code>
-import React from "react";
-import ReactDOM from "react-dom/client";
-import App from "./App";
-import "./index.css";
-
-ReactDOM.createRoot(document.getElementById("root")).render(
-  &lt;React.StrictMode&gt;
-    &lt;App /&gt;
-  &lt;/React.StrictMode&gt;
-);
-</code>
-</div>
-
-
-<!-- =============================================== -->
-<div class="section">
-<div class="section-title">src/App.jsx</div>
-<code>
-import { useState } from "react";
-import { ThemeProvider } from "./context/ThemeContext";
-import Login from "./pages/Login";
-import Signup from "./pages/Signup";
-
-export default function App() {
-  const [page, setPage] = useState("signup");
-
-  return (
-    &lt;ThemeProvider&gt;
-      {page === "login"
-        ? &lt;Login onNavigate={setPage} /&gt;
-        : &lt;Signup onNavigate={setPage} /&gt;}
-    &lt;/ThemeProvider&gt;
-  );
-}
-</code>
-</div>
-
-
-<!-- =============================================== -->
-<div class="section">
-<div class="section-title">src/context/ThemeContext.jsx</div>
-<code>
-import { createContext, useContext, useEffect, useState } from "react";
-
-const ThemeContext = createContext();
-
-export const ThemeProvider = ({ children }) =&gt; {
-  const [theme, setTheme] = useState("dark");
-
-  useEffect(() =&gt; {
-    document.documentElement.classList.remove("light","dark");
-    document.documentElement.classList.add(theme);
-  }, [theme]);
-
-  const toggleTheme = () =&gt; {
-    setTheme(theme === "dark" ? "light" : "dark");
-  };
-
-  return (
-    &lt;ThemeContext.Provider value={{ theme, toggleTheme }}&gt;
-      {children}
-    &lt;/ThemeContext.Provider&gt;
-  );
-};
-
-export const useTheme = () =&gt; useContext(ThemeContext);
-</code>
-</div>
-
-
-<!-- =============================================== -->
-<div class="section">
-<div class="section-title">src/components/ThemeToggle.jsx</div>
-<code>
-import { Sun, Moon } from "lucide-react";
-import { useTheme } from "../context/ThemeContext";
-
-export default function ThemeToggle() {
-  const { theme, toggleTheme } = useTheme();
-
-  return (
-    &lt;button
-      onClick={toggleTheme}
-      className="absolute top-6 right-6 p-2 rounded-lg hover:bg-gray-700/50"
-    &gt;
-      {theme === "dark" ? &lt;Sun className="text-gray-300" /&gt; : &lt;Moon /&gt;}
-    &lt;/button&gt;
-  );
-}
-</code>
-</div>
-
-
-<!-- =============================================== -->
-<div class="section">
-<div class="section-title">src/components/BackButton.jsx</div>
-<code>
-import { ArrowLeft } from "lucide-react";
-
-export default function BackButton() {
-  return (
-    &lt;button className="absolute top-6 left-6 flex items-center gap-2 text-blue-400"&gt;
-      &lt;ArrowLeft size={16} /&gt;
-      Back
-    &lt;/button&gt;
-  );
-}
-</code>
-</div>
-
-
-<!-- =============================================== -->
-<div class="section">
-<div class="section-title">src/components/InputField.jsx</div>
-<code>
-import { Mail, Lock, User, Eye, EyeOff, XCircle } from "lucide-react";
-import { useTheme } from "../context/ThemeContext";
-import { useState } from "react";
-
-export default function InputField({ 
-  label, icon, type="text", value, onChange, error, placeholder 
-}) {
-  const { theme } = useTheme();
-  const [show, setShow] = useState(false);
-
-  const icons = { user: User, mail: Mail, lock: Lock };
-  const Icon = icons[icon];
-
-  const inputType = type === "password" &amp;&amp; show ? "text" : type;
-
-  return (
-    &lt;div className="mb-5"&gt;
-      &lt;label className="text-sm"&gt;{label}&lt;/label&gt;
-
-      &lt;div className="relative mt-1"&gt;
-        &lt;Icon className="absolute left-3 top-3 text-gray-500" size={18} /&gt;
-
-        &lt;input
-          type={inputType}
-          value={value}
-          placeholder={placeholder}
-          onChange={(e)=&gt;onChange(e.target.value)}
-          className="w-full bg-gray-900 text-white py-3 pl-10 pr-10 rounded-lg"
-        /&gt;
-
-        {type === "password" &amp;&amp; value &amp;&amp; (
-          &lt;button 
-            type="button"
-            onClick={()=&gt;setShow(!show)}
-            className="absolute right-3 top-3 text-gray-400"&gt;
-            {show ? &lt;EyeOff size={18} /&gt; : &lt;Eye size={18} /&gt;}
-          &lt;/button&gt;
-        )}
-      &lt;/div&gt;
-
-      {error &amp;&amp; (
-        &lt;p className="text-red-400 text-xs flex items-center gap-1 mt-1"&gt;
-          &lt;XCircle size={12} /&gt; {error}
-        &lt;/p&gt;
-      )}
-    &lt;/div&gt;
-  );
-}
-</code>
-</div>
-
-
-<!-- =============================================== -->
-<div class="section">
-<div class="section-title">src/pages/Login.jsx</div>
-<code>
-import { useState } from "react";
-import InputField from "../components/InputField";
-import ThemeToggle from "../components/ThemeToggle";
-import BackButton from "../components/BackButton";
-import { useTheme } from "../context/ThemeContext";
-
-export default function Login({ onNavigate }) {
-  const { theme } = useTheme();
-
-  const [email,setEmail] = useState("");
-  const [password,setPassword] = useState("");
-  const [errors,setErrors] = useState({});
-
-  const validate = () =&gt; {
-    const e = {};
-    if (!email) e.email="Email required";
-    if (!password) e.password="Password required";
-    setErrors(e);
-    return Object.keys(e).length===0;
-  };
-
-  const handleLogin = () =&gt; {
-    if (!validate()) return;
-    alert("Login success"); // simple
-  };
-
-  return (
-    &lt;div className="min-h-screen flex items-center justify-center dark-bg relative"&gt;
-
-      &lt;BackButton /&gt;
-      &lt;ThemeToggle /&gt;
-
-      &lt;div className="p-10 rounded-xl bg-gray-800/50 backdrop-blur-lg w-full max-w-md"&gt;
-
-        &lt;h1 className="text-3xl text-white mb-6"&gt;
-          Welcome Back
-        &lt;/h1&gt;
-
-        &lt;InputField 
-          label="Email" icon="mail"
-          value={email} onChange={setEmail}
-          error={errors.email}
-          placeholder="name@example.com"
-        /&gt;
-
-        &lt;InputField 
-          label="Password" icon="lock" type="password"
-          value={password} onChange={setPassword}
-          error={errors.password}
-          placeholder="Your password"
-        /&gt;
-
-        &lt;button 
-          onClick={handleLogin}
-          className="w-full bg-blue-600 text-white py-3 rounded-lg"&gt;
-          Login
-        &lt;/button&gt;
-
-        &lt;p className="text-center text-sm text-gray-400 mt-4"&gt;
-          Don't have an account?
-          &lt;button 
-            className="text-blue-400"
-            onClick={()=&gt;onNavigate("signup")}&gt;
-            Sign Up
-          &lt;/button&gt;
-        &lt;/p&gt;
-
-      &lt;/div&gt;
-
-    &lt;/div&gt;
-  );
-}
-</code>
-</div>
-
-
-<!-- =============================================== -->
-<div class="section">
-<div class="section-title">src/pages/Signup.jsx</div>
-<code>
-import { useState } from "react";
-import InputField from "../components/InputField";
-import ThemeToggle from "../components/ThemeToggle";
-import BackButton from "../components/BackButton";
-import { useTheme } from "../context/ThemeContext";
-
-export default function Signup({ onNavigate }) {
-
-  const [name,setName] = useState("");
-  const [email,setEmail] = useState("");
-  const [password,setPassword] = useState("");
-  const [confirm,setConfirm] = useState("");
-  const [errors,setErrors] = useState({});
-
-  const validate = () =&gt; {
-    const e={};
-    if (!name) e.name="Name required";
-    if (!email) e.email="Email required";
-    if (!password) e.password="Password required";
-    if (password!==confirm) e.confirm="Passwords do not match";
-    setErrors(e);
-    return Object.keys(e).length===0;
-  };
-
-  const handleSignup = () =&gt; {
-    if (!validate()) return;
-    alert("Signup successful");
-  };
-
-  return (
-    &lt;div className="min-h-screen flex items-center justify-center dark-bg relative"&gt;
-
-      &lt;BackButton /&gt;
-      &lt;ThemeToggle /&gt;
-
-      &lt;div className="p-10 rounded-xl bg-gray-800/50 backdrop-blur-lg w-full max-w-md"&gt;
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useCallback, useMemo } = React;
+
+        // ============ API SERVICE ============
+        const API_BASE_URL = 'http://localhost:8080/api'; // Change this to your backend URL
+
+        const apiService = {
+            executeCode: async (code) => {
+                try {
+                    const response = await fetch(`${API_BASE_URL}/execute`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ code }),
+                    });
+                    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                    return await response.json();
+                } catch (error) {
+                    console.error('API call failed:', error);
+                    throw error;
+                }
+            },
+
+            getExecutionSteps: async (code) => {
+                try {
+                    const response = await fetch(`${API_BASE_URL}/execution-steps`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ code }),
+                    });
+                    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                    return await response.json();
+                } catch (error) {
+                    console.error('API call failed:', error);
+                    throw error;
+                }
+            },
+
+            compileCode: async (code) => {
+                try {
+                    const response = await fetch(`${API_BASE_URL}/compile`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ code }),
+                    });
+                    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                    return await response.json();
+                } catch (error) {
+                    console.error('API call failed:', error);
+                    throw error;
+                }
+            },
+
+            saveCode: async (code, filename) => {
+                try {
+                    const response = await fetch(`${API_BASE_URL}/save`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ code, filename }),
+                    });
+                    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                    return await response.json();
+                } catch (error) {
+                    console.error('API call failed:', error);
+                    throw error;
+                }
+            },
+
+            loadCode: async (filename) => {
+                try {
+                    const response = await fetch(`${API_BASE_URL}/load/${filename}`);
+                    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                    return await response.json();
+                } catch (error) {
+                    console.error('API call failed:', error);
+                    throw error;
+                }
+            },
+
+            getSavedFiles: async () => {
+                try {
+                    const response = await fetch(`${API_BASE_URL}/files`);
+                    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                    return await response.json();
+                } catch (error) {
+                    console.error('API call failed:', error);
+                    throw error;
+                }
+            }
+        };
+
+        // ============ MOCK DATA (for testing without backend) ============
+        const mockExecutionSteps = [
+            { line: 2, action: 'method_call', method: 'main', stack: [{ method: 'main(String[])', line: 2 }] },
+            { line: 3, action: 'print', output: 'Hello, World!', stack: [{ method: 'main(String[])', line: 3 }] },
+            { line: 4, action: 'declare', variable: { name: 'x', value: '5' }, stack: [{ method: 'main(String[])', line: 4 }] },
+            { line: 5, action: 'declare', variable: { name: 'y', value: '10' }, stack: [{ method: 'main(String[])', line: 5 }] },
+            { line: 6, action: 'calculate', variable: { name: 'sum', value: '15' }, stack: [{ method: 'main(String[])', line: 6 }] },
+            { line: 7, action: 'print', output: 'Sum: 15', stack: [{ method: 'main(String[])', line: 7 }] },
+            { line: 9, action: 'condition', stack: [{ method: 'main(String[])', line: 9 }] },
+            { line: 10, action: 'print', output: 'Sum is greater than 10', stack: [{ method: 'main(String[])', line: 10 }] },
+        ];
+
+        const USE_MOCK_DATA = true; // Set to false to use real API
+
+        // ============ EDITOR COMPONENT ============
+        const EditorPanel = ({ code, setCode, currentLine, previousLine, isDark, readOnly }) => {
+            const editorRef = React.useRef(null);
+            const cmInstance = React.useRef(null);
+
+            useEffect(() => {
+                if (!editorRef.current) return;
+
+                cmInstance.current = CodeMirror(editorRef.current, {
+                    value: code,
+                    mode: 'text/x-java',
+                    theme: isDark ? 'monokai' : 'default',
+                    lineNumbers: true,
+                    readOnly: readOnly,
+                    lineWrapping: true,
+                });
+
+                cmInstance.current.on('change', (cm) => {
+                    if (setCode && !readOnly) {
+                        setCode(cm.getValue());
+                    }
+                });
+
+                return () => {
+                    if (cmInstance.current) {
+                        cmInstance.current.toTextArea();
+                    }
+                };
+            }, []);
+
+            useEffect(() => {
+                if (cmInstance.current) {
+                    cmInstance.current.setOption('readOnly', readOnly);
+                }
+            }, [readOnly]);
+
+            useEffect(() => {
+                if (cmInstance.current) {
+                    const value = cmInstance.current.getValue();
+                    if (value !== code) {
+                        cmInstance.current.setValue(code);
+                    }
+                }
+            }, [code]);
+
+            useEffect(() => {
+                if (!cmInstance.current) return;
+
+                // Clear all line classes
+                for (let i = 0; i < cmInstance.current.lineCount(); i++) {
+                    cmInstance.current.removeLineClass(i, 'background');
+                }
+
+                if (currentLine) {
+                    cmInstance.current.addLineClass(currentLine - 1, 'background', 'cm-current-line-highlight');
+                }
+                if (previousLine && previousLine !== currentLine) {
+                    cmInstance.current.addLineClass(previousLine - 1, 'background', 'cm-previous-line-highlight');
+                }
+            }, [currentLine, previousLine]);
+
+            return <div ref={editorRef}></div>;
+        };
+
+        // ============ HEADER COMPONENT ============
+        const Header = ({ isDark, onToggleTheme, onBack }) => (
+            <div className="flex justify-between items-center mb-6 max-w-7xl mx-auto">
+                <button
+                    onClick={onBack}
+                    className={`flex items-center gap-2 px-4 py-2 rounded transition ${
+                        isDark ? 'bg-gray-800 text-white hover:bg-gray-700' : 'bg-white text-gray-900 hover:bg-gray-100 border border-gray-300'
+                    }`}
+                >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                    </svg>
+                    Back
+                </button>
+
+                <button
+                    onClick={onToggleTheme}
+                    className={`flex items-center gap-2 px-4 py-2 rounded transition ${
+                        isDark ? 'bg-gray-800 text-white hover:bg-gray-700' : 'bg-white text-gray-900 hover:bg-gray-100 border border-gray-300'
+                    }`}
+                >
+                    {isDark ? (
+                        <>
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                            </svg>
+                            Light
+                        </>
+                    ) : (
+                        <>
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                            </svg>
+                            Dark
+                        </>
+                    )}
+                </button>
+            </div>
+        );
+
+        // ============ CONTROL PANEL ============
+        const ControlPanel = ({ isExecuting, currentStep, totalSteps, currentLine, executionSpeed, onStart, onPause, onStepForward, onStepBackward, onReset, onSpeedChange, isDark, disabled }) => (
+            <div className={`mb-6 p-4 rounded-lg ${isDark ? 'bg-gray-800' : 'bg-white border border-gray-300'}`}>
+                <div className="flex flex-wrap gap-3 items-center">
+                    <button onClick={onStart} disabled={isExecuting || disabled} className={`flex items-center gap-2 px-4 py-2 rounded transition ${(isExecuting || disabled) ? 'bg-gray-500 cursor-not-allowed' : 'bg-green-600 hover:bg-green-700'} text-white`}>
+                        <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z" />
+                        </svg>
+                        Start
+                    </button>
+
+                    <button onClick={onPause} disabled={!isExecuting} className={`flex items-center gap-2 px-4 py-2 rounded transition ${!isExecuting ? 'bg-gray-500 cursor-not-allowed' : isDark ? 'bg-yellow-600 hover:bg-yellow-700' : 'bg-yellow-500 hover:bg-yellow-600'} text-white`}>
+                        <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M5.5 3.5A1.5 1.5 0 017 5v10a1.5 1.5 0 01-3 0V5a1.5 1.5 0 011.5-1.5zM13 3.5A1.5 1.5 0 0114.5 5v10a1.5 1.5 0 01-3 0V5A1.5 1.5 0 0113 3.5z" />
+                        </svg>
+                        Pause
+                    </button>
+
+                    <button onClick={onStepBackward} disabled={currentStep <= 0} className={`flex items-center gap-2 px-4 py-2 rounded transition ${currentStep <= 0 ? 'bg-gray-500 cursor-not-allowed' : isDark ? 'bg-blue-600 hover:bg-blue-700' : 'bg-blue-500 hover:bg-blue-600'} text-white`}>
+                        <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M8.445 14.832A1 1 0 0010 14v-2.798l5.445 3.63A1 1 0 0017 14V6a1 1 0 00-1.555-.832L10 8.798V6a1 1 0 00-1.555-.832l-6 4a1 1 0 000 1.664l6 4z" />
+                        </svg>
+                        Step Back
+                    </button>
+
+                    <button onClick={onStepForward} disabled={currentStep >= totalSteps - 1} className={`flex items-center gap-2 px-4 py-2 rounded transition ${currentStep >= totalSteps - 1 ? 'bg-gray-500 cursor-not-allowed' : isDark ? 'bg-blue-600 hover:bg-blue-700' : 'bg-blue-500 hover:bg-blue-600'} text-white`}>
+                        Step Forward
+                        <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M4.555 5.168A1 1 0 003 6v8a1 1 0 001.555.832L10 11.202V14a1 1 0 001.555.832l6-4a1 1 0 000-1.664l-6-4A1 1 0 0010 6v2.798l-5.445-3.63z" />
+                        </svg>
+                    </button>
+
+                    <button onClick={onReset} className={`flex items-center gap-2 px-4 py-2 rounded transition ${isDark ? 'bg-red-600 hover:bg-red-700' : 'bg-red-500 hover:bg-red-600'} text-white`}>
+                        <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clipRule="evenodd" />
+                        </svg>
+                        Reset
+                    </button>
+
+                    <div className="ml-auto flex items-center gap-3">
+                        <label className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>Speed:</label>
+                        <input type="range" min="200" max="2000" step="200" value={executionSpeed} onChange={(e) => onSpeedChange(Number(e.target.value))} className="w-32" />
+                        <span className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>{executionSpeed}ms</span>
+                    </div>
+                </div>
+
+                <div className={`mt-3 text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                    Step: {currentStep + 1} / {totalSteps}
+                    {currentLine && ` | Current Line: ${currentLine}`}
+                </div>
+            </div>
+        );
+
+        // ============ VARIABLE STATE DISPLAY ============
+        const VariableStateDisplay = ({ variables, isDark }) => (
+            <div className={`p-4 rounded-lg ${isDark ? 'bg-gray-800' : 'bg-white border border-gray-300'}`}>
+                <h3 className={`text-lg font-bold mb-3 ${isDark ? 'text-white' : 'text-gray-900'}`}>Variable State</h3>
+                {variables.length === 0 ? (
+                    <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>No variables yet. Start execution to see variable states.</p>
+                ) : (
+                    <div className="space-y-2">
+                        {variables.map((variable, index) => (
+                            <div key={index} className={`p-3 rounded flex justify-between items-center ${isDark ? 'bg-gray-700' : 'bg-gray-50'}`}>
+                                <span className={`font-mono font-semibold ${isDark ? 'text-blue-400' : 'text-blue-600'}`}>{variable.name}</span>
+                                <span className={`font-mono ${isDark ? 'text-green-400' : 'text-green-600'}`}>{variable.value}</span>
+                            </div>
+                        ))}
+                    </div>
+                )}
+            </div>
+        );
+
+        // ============ OUTPUT CONSOLE ============
+        const OutputConsole = ({ output, isDark }) => (
+            <div className={`p-4 rounded-lg ${isDark ? 'bg-gray-800' : 'bg-white border border-gray-300'}`}>
+                <h3 className={`text-lg font-bold mb-3 ${isDark ? 'text-white' : 'text-gray-900'}`}>Console Output</h3>
+                <div className={`p-3 rounded font-mono text-sm min-h-[100px] max-h-[200px] overflow-y-auto ${isDark ? 'bg-gray-900 text-green-400' : 'bg-gray-50 text-gray-900'}`}>
+                    {output.length === 0 ? (
+                        <span className={isDark ? 'text-gray-500' : 'text-gray-400'}>Output will appear here...</span>
+                    ) : (
+                        output.map((line, index) => <div key={index}>{line}</div>)
+                    )}
+                </div>
+            </div>
+        );
+
+        // ============ CALL STACK ============
+        const CallStack = ({ stack, isDark }) => (
+            <div className={`p-4 rounded-lg ${isDark ? 'bg-gray-800' : 'bg-white border border-gray-300'}`}>
+                <h3 className={`text-lg font-bold mb-3 ${isDark ? 'text-white' : 'text-gray-900'}`}>Call Stack</h3>
+                {stack.length === 0 ? (
+                    <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>No active function calls</p>
+                ) : (
+                    <div className="space-y-2">
+                        {stack.map((call, index) => (
+                            <div key={index} className={`p-3 rounded ${isDark ? 'bg-gray-700' : 'bg-gray-50'}`}>
+                                <div className={`font-mono font-semibold ${isDark ? 'text-purple-400' : 'text-purple-600'}`}>{call.method}</div>
+                                <div className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>Line {call.line}</div>
+                            </div>
+                        ))}
+                    </div>
+                )}
+            </div>
+        );
+
+        // ============ MAIN APP ============
+        const CodeLensVisualizer = () => {
+            const [code, setCode] = useState(`public class HelloWorld {
+    public static void main(String[] args) {
+        System.out.println("Hello, World!");
+        int x = 5;
+        int y = 10;
+        int sum = x + y;
+        System.out.println("Sum: " + sum);
         
-        &lt;h1 className="text-3xl text-white mb-6"&gt;
-          Create Account
-        &lt;/h1&gt;
+        if (sum > 10) {
+            System.out.println("Sum is greater than 10");
+        }
+    }
+}`);
+            const [isDark, setIsDark] = useState(true);
+            const [isExecuting, setIsExecuting] = useState(false);
+            const [isLoading, setIsLoading] = useState(false);
+            const [error, setError] = useState(null);
+            const [executionSteps, setExecutionSteps] = useState([]);
+            const [currentStep, setCurrentStep] = useState(-1);
+            const [variables, setVariables] = useState([]);
+            const [output, setOutput] = useState([]);
+            const [callStack, setCallStack] = useState([]);
+            const [currentLine, setCurrentLine] = useState(null);
+            const [previousLine, setPreviousLine] = useState(null);
+            const [executionSpeed, setExecutionSpeed] = useState(1000);
 
-        &lt;InputField 
-          label="Full Name" icon="user"
-          value={name} onChange={setName}
-          error={errors.name}
-          placeholder="John Doe"
-        /&gt;
+            const executeStep = useCallback((step) => {
+                const stepData = executionSteps[step];
+                if (!stepData) return;
 
-        &lt;InputField 
-          label="Email" icon="mail"
-          value={email} onChange={setEmail}
-          error={errors.email}
-          placeholder="name@example.com"
-        /&gt;
+                setPreviousLine(currentLine);
+                setCurrentLine(stepData.line);
+                setCallStack(stepData.stack || []);
 
-        &lt;InputField 
-          label="Password" icon="lock" type="password"
-          value={password} onChange={setPassword}
-          error={errors.password}
-          placeholder="Create password"
-        /&gt;
+                if (stepData.action === 'print' && stepData.output) {
+                    setOutput(prev => [...prev, stepData.output]);
+                } else if ((stepData.action === 'declare' || stepData.action === 'calculate') && stepData.variable) {
+                    setVariables(prev => {
+                        const existing = prev.findIndex(v => v.name === stepData.variable.name);
+                        if (existing >= 0) {
+                            const newVars = [...prev];
+                            newVars[existing] = stepData.variable;
+                            return newVars;
+                        }
+                        return [...prev, stepData.variable];
+                    });
+                }
+            }, [executionSteps, currentLine]);
 
-        &lt;InputField 
-          label="Confirm Password" icon="lock" type="password"
-          value={confirm} onChange={setConfirm}
-          error={errors.confirm}
-          placeholder="Confirm your password"
-        /&gt;
+            const handleStart = async () => {
+                setIsLoading(true);
+                setError(null);
 
-        &lt;button 
-          onClick={handleSignup}
-          className="w-full bg-blue-600 text-white py-3 rounded-lg"&gt;
-          Create Account
-        &lt;/button&gt;
+                try {
+                    let steps;
+                    if (USE_MOCK_DATA) {
+                        steps = mockExecutionSteps;
+                    } else {
+                        const result = await apiService.getExecutionSteps(code);
+                        if (!result.success) {
+                            setError(result.error || 'Failed to get execution steps');
+                            setIsLoading(false);
+                            return;
+                        }
+                        steps = result.steps || [];
+                    }
 
-        &lt;p className="text-center text-sm text-gray-400 mt-4"&gt;
-          Already have an account?
-          &lt;button 
-            className="text-blue-400"
-            onClick={()=&gt;onNavigate("login")}&gt;
-            Login
-          &lt;/button&gt;
-        &lt;/p&gt;
+                    setExecutionSteps(steps);
+                    setCurrentStep(0);
+                    setVariables([]);
+                    setOutput([]);
+                    setCallStack([]);
+                    setCurrentLine(null);
+                    setPreviousLine(null);
+                    setIsExecuting(true);
+                } catch (err) {
+                    setError(`Error: ${err.message}`);
+                } finally {
+                    setIsLoading(false);
+                }
+            };
 
-      &lt;/div&gt;
+            const handlePause = () => setIsExecuting(false);
+            const handleReset = () => {
+                setIsExecuting(false);
+                setCurrentStep(-1);
+                setVariables([]);
+                setOutput([]);
+                setCallStack([]);
+                setCurrentLine(null);
+                setPreviousLine(null);
+                setError(null);
+            };
 
-    &lt;/div&gt;
-  );
-}
-</code>
-</div>
+            const handleStepForward = () => {
+                if (currentStep < executionSteps.length - 1) {
+                    const nextStep = currentStep + 1;
+                    setCurrentStep(nextStep);
+                    executeStep(nextStep);
+                }
+            };
 
+            const handleStepBackward = () => {
+                if (currentStep > 0) {
+                    const prevStep = currentStep - 1;
+                    setCurrentStep(prevStep);
+                    setVariables([]);
+                    setOutput([]);
+                    setCallStack([]);
+                    
+                    for (let i = 0; i <= prevStep; i++) {
+                        const stepData = executionSteps[i];
+                        if (stepData.action === 'print' && stepData.output) {
+                            setOutput(prev => [...prev, stepData.output]);
+                        } else if ((stepData.action === 'declare' || stepData.action === 'calculate') && stepData.variable) {
+                            setVariables(prev => {
+                                const existing = prev.findIndex(v => v.name === stepData.variable.name);
+                                if (existing >= 0) {
+                                    const newVars = [...prev];
+                                    newVars[existing] = stepData.variable;
+                                    return newVars;
+                                }
+                                return [...prev, stepData.variable];
+                            });
+                        }
+                    }
+                    
+                    const prevStepData = executionSteps[prevStep];
+                    setPreviousLine(prevStep > 0 ? executionSteps[prevStep - 1].line : null);
+                    setCurrentLine(prevStepData.line);
+                    setCallStack(prevStepData.stack || []);
+                }
+            };
+
+            useEffect(() => {
+                if (isExecuting && currentStep < executionSteps.length - 1) {
+                    const timer = setTimeout(() => {
+                        handleStepForward();
+                    }, executionSpeed);
+                    return () => clearTimeout(timer);
+                } else if (currentStep >= executionSteps.length - 1 && isExecuting) {
+                    setIsExecuting(false);
+                }
+            }, [isExecuting, currentStep, executionSteps.length, executionSpeed]);
+
+            return (
+                <div className={`min-h-screen ${isDark ? 'bg-gray-900' : 'bg-gray-50'}`}>
+                    <div className="p-6">
+                        <Header isDark={isDark} onToggleTheme={() => setIsDark(!isDark)} onBack={() => console.log('Back')} />
+
+                        <div className="max-w-7xl mx-auto">
+                            <h1 className={`text-3xl font-bold mb-6 ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                                CodeLens Visualizer - Java
+                            </h1>
+
+                            {error && (
+                                <div className={`mb-6 p-4 rounded-lg ${isDark ? 'bg-red-900/30 border border-red-500' : 'bg-red-50 border border-red-300'}`}>
+                                    <h3 className={`font-bold mb-1 ${isDark ? 'text-red-400' : 'text-red-700'}`}>Error</h3>
+                                    <p className={`text-sm ${isDark ? 'text-red-300' : 'text-red-600'}`}>{error}</p>
+                                </div>
+                            )}
+
+                            {isLoading && (
+                                <div className={`mb-6 p-4 rounded-lg flex items-center gap-3 ${isDark ? 'bg-gray-800' : 'bg-white border border-gray-300'}`}>
+                                    <div className={`w-8 h-8 rounded-full border-4 border-t-transparent animate-spin ${isDark ? 'border-blue-500' : 'border-blue-600'}`}></div>
+                                    <span className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>Loading...</span>
+                                </div>
+                            )}
+
+                            <ControlPanel
+                                isExecuting={isExecuting}
+                                currentStep={currentStep}
+                                totalSteps={executionSteps.length}
+                                currentLine={currentLine}
+                                executionSpeed={executionSpeed}
+                                onStart={handleStart}
+                                onPause={handlePause}
+                                onStepForward={handleStepForward}
+                                onStepBackward={handleStepBackward}
+                                onReset={handleReset}
+                                onSpeedChange={setExecutionSpeed}
+                                isDark={isDark}
+                                disabled={isLoading}
+                            />
+
+                            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                                <div className="lg:col-span-2">
+                                    <EditorPanel
+                                        code={code}
+                                        setCode={setCode}
+                                        currentLine={currentLine}
+                                        previousLine={previousLine}
+                                        isDark={isDark}
+                                        readOnly={isExecuting || isLoading}
+                                    />
+                                </div>
+
+                                <div className="space-y-6">
+                                    <CallStack stack={callStack} isDark={isDark} />
+                                    <VariableStateDisplay variables={variables} isDark={isDark} />
+                                    <OutputConsole output={output} isDark={isDark} />
+                                </div>
+                            </div>
+
+                            <div className={`mt-6 text-center text-sm ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>
+                                {USE_MOCK_DATA ? '⚠️ Using Mock Data (Set USE_MOCK_DATA = false to use real API)' : 'Connected to Backend API'}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        // ============ RENDER APP ============
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<CodeLensVisualizer />);
+    </script>
 </body>
 </html>
